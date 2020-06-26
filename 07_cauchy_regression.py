@@ -1,14 +1,10 @@
 import pystan
-import pandas as pd 
-import numpy as np 
-from numpy.random import *
-import seaborn as sns
-import matplotlib.pyplot as plt
-from plotter.regression_alalysis_plots import *
+from stan_plotter.regression_alalysis_plots import *
 from scipy.stats import mstats
 
 """
-
+コーシー分布を仮定した回帰分析
+ターゲットが時々大きく外れ値を発生さえるときに有効
 """
 
 def main():

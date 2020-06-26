@@ -1,14 +1,16 @@
 import pystan
-from numpy.random import *
-import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from stan_plotter.regression_alalysis_plots import *
 
 """
 単回帰分析
 """
 
+
 def main():
     iris = load_iris()
     df = pd.DataFrame(iris.data, columns=iris.feature_names)
+    df['target'] = pd.DataFrame(iris.target)
     data = {
         'N': len(df),
         'X': list(df['sepal length (cm)']),
@@ -19,55 +21,44 @@ def main():
     data {
         int N;
         real Y[N];
+        real X[N];
     }
 
     parameters {
-        real mu;
-        real sig;
+        real b1;
+        real b2;
+        real<lower=0> sig;
+    }
+    
+    transformed parameters {
+        real mu[N];
+        for (n in 1:N)
+            mu[n] = b1 + b2*X[n];
     }
 
     model {
-        for (n in 1:N) {
-            Y[n] ~ normal(mu, sig);
-        }
+        for (n in 1:N)
+            Y[n] ~ normal(mu[n], sig);
+    }
+
+    generated quantities {
+        real y_pred[N];
+        for (n in 1:N)
+            y_pred[n] = normal_rng(mu[n], sig);
     }
     """
-    
+
     model = pystan.StanModel(model_code=code)
     fit = model.sampling(data=data, iter=1000, chains=2)
-    la = fit.extract(permuted=True)  # return a dictionary of arrays
-    print(la['mu'][-1])
-    print(la['sig'][-1])
+    la = fit.extract(permuted=True)
+    print(fit)
+    print('b1: {}'.format(np.mean(la['b1'])))
+    print('b2: {}'.format(np.mean(la['b2'])))
     fit.plot()
+
+    plot_predicted_vs_observed(df['target'], la['y_pred'])
+    plot_noise_distribution(df['target'], la['mu'])
     plt.show()
-
-    # schools_code = """
-    # data {
-    #     int<lower=0> J; // number of schools
-    #     vector[J] y; // estimated treatment effects
-    #     vector<lower=0>[J] sigma; // s.e. of effect estimates
-    # }
-    # parameters {
-    #     real mu;
-    #     real<lower=0> tau;
-    #     vector[J] eta;
-    # }
-    # transformed parameters {
-    #     vector[J] theta;
-    #     theta = mu + tau * eta;
-    # }
-    # model {
-    #     eta ~ normal(0, 1);
-    #     y ~ normal(theta, sigma);
-    # }
-    # """
-
-    # schools_dat = {'J': 8,
-    #             'y': [28,  8, -3,  7, -1,  1, 18, 12],
-    #             'sigma': [15, 10, 16, 11,  9, 11, 10, 18]}
-
-    # sm = pystan.StanModel(model_code=schools_code)
-    # fit = sm.sampling(data=schools_dat, iter=1000, chains=2)
 
 
 if __name__ == '__main__':

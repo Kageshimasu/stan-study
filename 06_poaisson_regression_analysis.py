@@ -1,17 +1,14 @@
 import pystan
-import pandas as pd
-import numpy as np
-from numpy.random import *
-import seaborn as sns
-import matplotlib.pyplot as plt
-from plotter.regression_alalysis_plots import *
+from stan_plotter.regression_alalysis_plots import *
 
 """
+ポアソン会期
+上限なしのカウントデータがターゲットの場合有効。
 3カ月の授業の出席回数をターゲットとして予測する。
 授業回数はカウントデータなため、非負の値をとる。
 非負のカウントデータはポアソン回帰が有効である。
-lambdaは平均授業回数を表す
-Scoreが150点の時のlambda / Scoreが50点の時のlambda = 授業回数が平均で~倍変化するといえる
+lambdaは平均授業回数を表す。
+Scoreが150点の時のlambda / Scoreが50点の時のlambda = 授業回数が平均で~倍変化するといえる。
 """
 
 
@@ -62,7 +59,6 @@ def main():
     fit = model.sampling(data=data, iter=1000, chains=2)
     la = fit.extract(permuted=True)
     print(fit)
-    # plot_predicted_vs_observed(df['num_classes_for_three_months'], la['y_pred'])
     fit.plot()
     plt.show()
 

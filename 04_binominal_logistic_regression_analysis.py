@@ -1,16 +1,24 @@
 import pystan
-import pandas as pd 
-import numpy as np 
-from numpy.random import *
-import seaborn as sns
-import matplotlib.pyplot as plt
-from plotter.regression_alalysis_plots import *
+from stan_plotter.regression_alalysis_plots import *
 
 """
-3カ月の授業回数分、何回出席したのかを推定する。
+二項ロジスティック回帰分析
+■背景
+3カ月の授業のうち何回出席したのかを推定する。
 ターゲットの確率変数が0以上の整数で上限が決まっているため、二項分布として過程できる。
 この場合二項ロジスティック回帰が有効となる。
-残差プロットは未実装だが、plot_predicted_vs_observedで精度がわかる。
+plot_predicted_vs_observedで当てはまりを調べる。
+
+■技術要素
+尤度を示す。
+N: データ数(Observed)
+n_i: i番目のマックスのデータ数(Observed)
+x_i: i番目の確率変数、0~n_iの整数(Observed)
+b_i: i番目の回帰係数
+a_i[n]: n個目のデータにおけるi番目の説明変数
+
+p_i = logistic_function(b_0 + b_1*a_1[i] + , ... )
+L(b | N, n, p, x) = Π_{i=1}^{N} n_iCx_i p_i^{x_i} (1-p_i)^{n_i-x_i}
 """
 
 def main():
@@ -64,6 +72,7 @@ def main():
     model = pystan.StanModel(model_code=code)
     fit = model.sampling(data=data, iter=1000, chains=2)
     la = fit.extract(permuted=True)
+    print(fit)
     plot_predicted_vs_observed(df['num_of_attendances_for_the_three_months'], la['y_pred'])
     fit.plot()
     plt.show()

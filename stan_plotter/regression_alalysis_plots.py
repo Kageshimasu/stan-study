@@ -1,11 +1,18 @@
-import pandas as pd 
-import numpy as np 
+import pandas as pd
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-import scipy.stats as stats
 
 
-def plot_predicted_vs_observed(y_true, y_pred):
+def plot_predicted_vs_observed(y_true: pd.DataFrame, y_pred: np.ndarray):
+    """
+    予想した値と観測値の外れ具合を表す。
+    横軸が観測値に対して、縦軸が予測結果の4分位範囲を示した図。
+    ばらつきがなく、45度線上に点が打たれるほどいい。
+    :param y_true:　真の値
+    :param y_pred:　予測結果
+    :return:
+    """
     quantile = [10, 50, 90]
     quantile_colname = ['p' + str(x) for x in quantile]
     df_pred_quantile = pd.DataFrame(np.percentile(y_pred, q=quantile, axis=0).T, columns=quantile_colname)
@@ -13,7 +20,7 @@ def plot_predicted_vs_observed(y_true, y_pred):
 
     palette = sns.color_palette()
     fig = plt.figure()
-    ax = fig.add_subplot(1,1,1)
+    ax = fig.add_subplot(1, 1, 1)
     min_ax = np.min(y_true) - np.mean(y_true) * 0.1
     max_ax = np.max(y_true) + np.mean(y_true) * 0.1
     ax.plot([min_ax, max_ax], [min_ax, max_ax], 'k--', alpha=0.7)
@@ -35,6 +42,14 @@ def plot_predicted_vs_observed(y_true, y_pred):
 
 
 def plot_noise_distribution(y_true, mu_pred, estimator=np.mean):
+    """
+    残差のヒストグラムを表す。
+    正規分布に近いほどうまく当てはまっている
+    :param y_true: 真の値
+    :param mu_pred: 予測結果
+    :param estimator: default 平均値
+    :return:
+    """
     df_noises = y_true - estimator(mu_pred, axis=0)
 
     fig = plt.figure()
@@ -42,4 +57,3 @@ def plot_noise_distribution(y_true, mu_pred, estimator=np.mean):
     ax.set_xlabel('Value')
     ax.set_ylabel('Count')
     sns.distplot(list(df_noises), ax=ax)
-

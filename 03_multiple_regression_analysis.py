@@ -1,17 +1,11 @@
 import pystan
-import pandas as pd 
-import numpy as np 
-from numpy.random import *
-import seaborn as sns
-import matplotlib.pyplot as plt
-from plotter.regression_alalysis_plots import *
+from stan_plotter.regression_alalysis_plots import *
 
 """
 重回帰分析
-バイト好き、学習への興味が一年の出席率にどの程度影響するか
-plot_predicted_vs_observed:予想した値と観測値の外れ具合。45度線上に点が打たれるといい。
-plot_noise_distribution:残差をプロット。正規分布のようになるはず。
+「バイト好き」、「学習への興味」が1年の出席率にどの程度影響するか
 """
+
 
 def main():
     df = pd.read_csv('./data/data_attendance_for_mult.csv')
@@ -57,15 +51,13 @@ def main():
             y_pred[n] = normal_rng(mu[n], sigma);
     }
     """
-    
+
     model = pystan.StanModel(model_code=code)
     fit = model.sampling(data=data, iter=1000, chains=2)
     la = fit.extract(permuted=True)
     print(fit)
-    print(df['attendance_rate_for_a_year'])
-    print(la['y_pred'].shape)
     fit.plot()
-    
+
     plot_predicted_vs_observed(df['attendance_rate_for_a_year'], la['y_pred'])
     plot_noise_distribution(df['attendance_rate_for_a_year'], la['mu'])
     plt.show()

@@ -1,17 +1,11 @@
 import pystan
-import pandas as pd
-import numpy as np
-from numpy.random import *
-import seaborn as sns
-import matplotlib.pyplot as plt
-from plotter.regression_alalysis_plots import *
-from scipy.stats import mstats
+from stan_plotter.regression_alalysis_plots import *
 
 """
 階層モデル
 階層モデルは、個体差の種別(カテゴリー)が判明している状況で、
-個体差間を考慮したモデル。階層的に事前分布を設定してるため
-階層モデルと呼ぶ。
+個体差間を考慮したモデル。
+階層的に事前分布を設定してるため階層モデルと呼ぶ。
 m1 = バイアスの全体平均
 m2 = 傾きの全体平均
 b1[K] ~ N(m1, sigma_b1) b1は全体平均を通してばらついている -> すべてのパラメータは同じ分布から生成されたと仮定
@@ -59,9 +53,8 @@ def main():
             b2[k] ~ normal(m2, sigma_b2);
         }
     
-        for (n in 1:N) {
+        for (n in 1:N)
             Y[n] ~ normal(b1[KID[n]] + b2[KID[n]] * X[n], sigma);
-        }
     }
     
     generated quantities {
