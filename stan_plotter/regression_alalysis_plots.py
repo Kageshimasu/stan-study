@@ -41,7 +41,7 @@ def plot_predicted_vs_observed(y_true: pd.DataFrame, y_pred: np.ndarray):
     ax.set_ylabel('Predicted')
 
 
-def plot_noise_distribution(y_true, mu_pred, estimator=np.mean):
+def plot_noise_distribution(y_true: pd.DataFrame, mu_pred: np.ndarray, estimator=np.mean):
     """
     残差のヒストグラムを表す。
     正規分布に近いほどうまく当てはまっている
@@ -57,3 +57,26 @@ def plot_noise_distribution(y_true, mu_pred, estimator=np.mean):
     ax.set_xlabel('Value')
     ax.set_ylabel('Count')
     sns.distplot(list(df_noises), ax=ax)
+
+
+def plot_linear_regression(x_true, y_true, y_pred, x, y):
+    """
+    回帰上に50%区間、90%区間を描画する
+    :param y_true:
+    :param x_true:
+    :param y_pred:
+    :param x:
+    :param y:
+    :return:
+    """
+    quantile = [5, 25, 75, 95]
+    quantile_colname = ['p' + str(x) for x in quantile]
+    df_pred_quantile = pd.DataFrame(np.percentile(y_pred, q=quantile, axis=0).T, columns=quantile_colname)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+
+    ax.scatter(x_true, y_true)
+    # ax.plot(x, y)
+    ax.fill_between(x, df_pred_quantile.p25, df_pred_quantile.p75, color='#262626', alpha=0.4)
+    ax.fill_between(x, df_pred_quantile.p5, df_pred_quantile.p95, color='#888888', alpha=0.4)
